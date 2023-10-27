@@ -1,4 +1,4 @@
-package cobos.santiago.POC_SpringBatch;
+package cobos.santiago.poc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

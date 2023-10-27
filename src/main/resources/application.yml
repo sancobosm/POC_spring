@@ -1,0 +1,17 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://127.0.0.1:57017/mydatabase
+      username: root
+      password: secret
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/poc
+    username: admin
+    password: 12345
+
+logging:
+  level:
+    root: info
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"

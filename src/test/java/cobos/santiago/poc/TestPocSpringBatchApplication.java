@@ -1,4 +1,4 @@
-package cobos.santiago.POC_SpringBatch;
+package cobos.santiago.poc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.TestConfiguration;
