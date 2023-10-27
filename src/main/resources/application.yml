@@ -1,3 +1,6 @@
+input:
+  file: people.csv
+
 spring:
   batch:
     jdbc:

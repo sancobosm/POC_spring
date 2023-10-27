@@ -1,41 +1,44 @@
 package cobos.santiago.poc.configuration;
 
-import cobos.santiago.poc.PocSpringBatchApplication;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.test.JobLauncherTestUtils;
 import org.springframework.batch.test.JobRepositoryTestUtils;
 import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
 
+import javax.print.DocFlavor;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Date;
 import java.util.stream.Stream;
 
 @SpringBatchTest
-@ContextConfiguration(classes = { PocSpringBatchApplication.class })
+@SpringBootTest(properties = {"input.file=peopleTest.csv"})
 @Slf4j
 class BatchConfigurationTest {
-
-    private static final Path DIRECTORY_TEST_CSV = Path.of("target/test-classes/resources");
-    private static final Path PEOPLE_TEST_CSV = Path.of("target/test-classes/resources/peopleTest.csv");
 
     @Autowired
     private JobRepositoryTestUtils jobRepositoryTestUtils;
     @Autowired
     private JobLauncherTestUtils jobLauncherTestUtils;
+    @Value("${input.file}")
+    private String input_file;
+    private final static String RESOURCES_PATH = "src/test/resources" + File.separator;
 
 
     @SneakyThrows
     @BeforeEach
     void setUp() {
-        if (Files.notExists(DIRECTORY_TEST_CSV)) {
-            Files.createDirectory(DIRECTORY_TEST_CSV);
+        if (Files.notExists(Path.of(RESOURCES_PATH + input_file))) {
+            Files.createFile(Path.of(RESOURCES_PATH + input_file));
         }
         jobRepositoryTestUtils.removeJobExecutions();
     }
@@ -43,7 +46,7 @@ class BatchConfigurationTest {
     @SneakyThrows
     @AfterEach
     void cleanUp() {
-        try (Stream<Path> fileTree = Files.walk(DIRECTORY_TEST_CSV)) {
+        try (Stream<Path> fileTree = Files.walk(Path.of(RESOURCES_PATH))) {
             fileTree.filter(Files::isRegularFile)
                     .map(Path::toFile)
                     .peek(file -> log.warn("Deleting the file: {}", file.getName()))
@@ -57,15 +60,13 @@ class BatchConfigurationTest {
     @DisplayName("GIVEN a csv with people WHEN jobLaunched THEN persist into db")
     void shouldReadCsvAndPersistDataIntoDataBase() {
         //GIVEN
-        Path shouldSucceessCsvPath = Path.of(DIRECTORY_TEST_CSV + File.separator + "people-test-should-success.csv");
-        var peopleCsv = Files.createFile(shouldSucceessCsvPath);
-        Files.writeString(peopleCsv, PeopleTestDataProviderUtils.supplyValidContent());
-
+        Files.writeString(Path.of(RESOURCES_PATH + input_file), PeopleTestDataProviderUtils.supplyValidContent());
         //WHEN
-       /* var jobParameter = new JobParametersBuilder()
+        /*var jobParameter = new JobParametersBuilder()
                 .addString("input.file.name", peopleCsv.toString())
                 .addDate("uniqueness", new Date())
                 .toJobParameters();*/
+
 
         JobExecution jobExecution = jobLauncherTestUtils.launchJob();
 
